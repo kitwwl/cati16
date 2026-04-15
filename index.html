@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>CATI 猫格测试 - 正式版</title>
+    <style>
+        :root {
+            --primary-color: #FFC300; 
+            --bg-color: #F0F2F5;
+            --card-bg: #FFFFFF;
+            --text-main: #2D3436; 
+            --text-sub: #636E72;
+            --progress-bg: #E0E0E0;
+        }
+
+        /* 基础适配 */
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body, html {
+            margin: 0; padding: 0;
+            width: 100%; height: 100%;
+            background-color: var(--bg-color);
+            font-family: -apple-system, "PingFang SC", "Helvetica Neue", sans-serif;
+            overflow-x: hidden;
+        }
+
+        /* PC端居中容器 */
+        #app {
+            width: 100%;
+            max-width: 500px; /* PC端锁定宽度 */
+            min-height: 100dvh;
+            margin: 0 auto;
+            background: white;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 0 50px rgba(0,0,0,0.05);
+        }
+
+        .screen {
+            flex: 1;
+            display: none;
+            flex-direction: column;
+            width: 100%;
+            animation: fadeIn 0.3s ease;
+        }
+        .screen.active { display: flex; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* 欢迎页 */
+        .welcome-content { text-align: center; padding: 10dvh 25px 40px; flex: 1; display: flex; flex-direction: column; }
+        .welcome-emoji { font-size: clamp(80px, 15dvh, 120px); margin-bottom: 20px; }
+        .welcome-title { font-size: clamp(28px, 4dvh, 36px); font-weight: 900; color: var(--primary-color); margin-bottom: 15px; }
+        .welcome-desc { font-size: 16px; line-height: 1.6; color: var(--text-sub); margin-bottom: 40px; }
+        .btn-start { 
+            background: var(--primary-color); color: var(--text-main); border: none; 
+            padding: 18px 0; width: 100%; max-width: 320px; margin: 0 auto; 
+            border-radius: 16px; font-size: 20px; font-weight: 900; cursor: pointer;
+            box-shadow: 0 8px 0px #E1AC00; transition: transform 0.1s;
+        }
+        .btn-start:active { transform: translateY(4px); box-shadow: 0 4px 0px #E1AC00; }
+        .welcome-footer { margin-top: auto; font-size: 12px; color: #B2BEC3; padding-bottom: 20px; }
+
+        /* 答题页 */
+        .quiz-header { padding: 30px 20px 10px; }
+        .progress-container { height: 10px; background: var(--progress-bg); border-radius: 5px; overflow: hidden; }
+        #progress-bar { height: 100%; width: 0%; background: var(--primary-color); transition: width 0.3s; }
+        .question-card { margin: 15px; padding: 30px 20px; background: white; border-radius: 20px; border: 1px solid #F0F0F0; }
+        .question-text { font-size: 19px; font-weight: 800; margin-bottom: 25px; line-height: 1.5; color: var(--text-main); }
+        .options-list { display: flex; flex-direction: column; gap: 10px; }
+        .option-item { padding: 16px 18px; background: #F8F9FA; border: 2px solid transparent; border-radius: 14px; font-size: 15px; cursor: pointer; transition: 0.2s; font-weight: 500; }
+        .option-item:active { background: #FFF9E6; border-color: var(--primary-color); }
+        .btn-back { margin: 15px auto; background: none; border: none; color: #BBB; font-size: 14px; cursor: pointer; text-decoration: underline; }
+
+        /* 结果页适配 */
+        .result-screen { background: white; }
+        .result-scroll-box { flex: 1; overflow-y: auto; padding-bottom: 40px; }
+        .cat-image-container {
+            width: 100%; max-width: 500px; aspect-ratio: 1/1; 
+            background: #F8F9FA; margin: 0 auto 30px; overflow: hidden;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .cat-image-container img { width: 100%; height: 100%; object-fit: cover; }
+        
+        .res-info { text-align: center; padding: 0 20px; }
+        .result-code-label { font-size: 28px; font-weight: 900; color: var(--text-main); margin-bottom: 5px; }
+        .result-name-label { font-size: 40px; font-weight: 900; margin: 0 0 15px; }
+        .result-slogan { font-size: 17px; font-style: italic; font-weight: 600; color: var(--text-sub); margin-bottom: 30px; }
+
+        .res-section { margin: 0 20px 30px; padding: 25px; background: white; border: 3px solid var(--primary-color); border-radius: 20px; text-align: left; }
+        .res-section-title { font-weight: 900; margin-bottom: 12px; font-size: 20px; }
+        .res-section-content { font-size: 16px; line-height: 1.8; color: var(--text-main); font-weight: 500; }
+        
+        .btn-restart { width: calc(100% - 40px); margin: 0 20px 40px; padding: 18px; border-radius: 15px; border: none; background: var(--primary-color); color: var(--text-main); font-size: 18px; font-weight: 900; cursor: pointer; box-shadow: 0 6px 0px #E1AC00; }
+
+        #loader { position: fixed; top:0; left:0; width:100%; height:100%; background: white; display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 1000; }
+    </style>
+</head>
+<body>
+
+<div id="app">
+    <!-- 首页 -->
+    <div id="screen-welcome" class="screen active">
+        <div class="welcome-content">
+            <div class="welcome-emoji">😺</div>
+            <div class="welcome-title">SBTI已经过时<br>CATI猫格来了</div>
+            <p class="welcome-desc">根据猫咪最真实的日常反应<br>探索它属于 16 型猫格中的哪一种？</p>
+            <button class="btn-start" onclick="startQuiz()">开始测试</button>
+            <div class="welcome-footer">作者：kit_ww（一只笨蛋美人金吉拉主人）</div>
+        </div>
+    </div>
+
+    <!-- 答题页 -->
+    <div id="screen-quiz" class="screen">
+        <div class="quiz-header">
+            <div class="progress-container"><div id="progress-bar"></div></div>
+            <div id="q-idx" style="text-align:center; font-size:13px; color:#999; margin-top:10px;">1 / 16</div>
+        </div>
+        <div class="question-card">
+            <div class="question-text" id="q-text"></div>
+            <div class="options-list" id="options-box"></div>
+        </div>
+        <button id="btn-prev" class="btn-back" onclick="prevQuestion()" style="display:none;">返回上一题</button>
+    </div>
+
+    <!-- 结果页 -->
+    <div id="screen-result" class="screen result-screen">
+        <div class="result-scroll-box">
+            <div class="cat-image-container">
+                <img id="res-img" src="" alt="猫格大图">
+            </div>
+            <div class="res-info">
+                <div class="result-code-label" id="res-code">CODE</div>
+                <div class="result-name-label" id="res-name">代号名字</div>
+                <div class="result-slogan" id="res-slogan">"短句"</div>
+            </div>
+            <div class="res-section">
+                <div class="res-section-title">🔍 猫格分析</div>
+                <div class="res-section-content" id="res-explain"></div>
+            </div>
+            <button class="btn-restart" onclick="location.reload()">重新测试</button>
+        </div>
+    </div>
+
+    <div id="loader">
+        <div style="width:50px; height:50px; border:6px solid #f3f3f3; border-top:6px solid var(--primary-color); border-radius:50%; animation:spin 1s linear infinite;"></div>
+        <p style="margin-top:20px; font-weight:900; color:var(--text-main);">正在解密猫格信号...</p>
+    </div>
+</div>
+
+<script>
+    const questions = [
+        { q: "家里突然来了陌生客人，它的第一反应是：", a: ["瞬间消失得无影无踪，直接钻进床底或柜子里", "飞奔过去闻鞋子，甚至主动蹭客人的腿", "在几米外保持观望，客人坐下后慢慢靠近", "躲在角落暗中观察，确认绝对安全才探头"], s: [1, 4, 3, 2] },
+        { q: "带它去宠物医院，或者带它出门时，它的表现是：", a: ["缩成一团疯狂哈气，甚至出爪攻击靠近的人", "吓得发抖，一动不敢动，任由医生摆布", "大声骂骂咧咧，但敢于东张西望探索诊室", "试图往你怀里钻，或者到处乱窜想越狱"], s: [1, 2, 4, 3] },
+        { q: "它平时在家，最喜欢占据什么样的空间？", a: ["喜欢独自待在没人的空房间或高处", "必须贴着人，永远待在人类活动的中心", "长期待在衣柜顶、沙发底等绝对死角", "待在有人的房间里，但保持一点点距离"], s: [2, 4, 1, 3] },
+        { q: "日常生活中，它的叫声频率有多高？", a: ["惜字如金，日常基本是个安静的“哑巴”", "偶尔发出极小的气音，声音微弱", "绝对话痨，随时随地跟人“对骂”", "有明确需求（饿了、要玩）时才会主动叫"], s: [1, 2, 4, 3] },
+        { q: "面对新买的复杂猫爬架或大型新玩具：", a: ["完全无视，继续回破旧的老猫窝睡觉", "绕着闻一圈，过一会再试探着上去", "闻半天不敢上，最后只钻装猫爬架的快递纸箱", "立马跳上去，里里外外搜寻研究一遍"], s: [1, 3, 2, 4] },
+        { q: "当你打开衣柜门或抽屉找东西时：", a: ["探头进去闻闻味道，很快就退出来", "只要开门，它必定飞奔过来钻进去探索", "待在原地继续睡觉，根本不关心", "坐在外面看着你，绝不进去"], s: [3, 4, 1, 2] },
+        { q: "它对于日常环境中的高度与危险感知度：", a: ["非常稳重，从不尝试没把握的跳跃", "典型“作死”体质，完全不管牛顿定律，哪里危险去哪", "只在平地活动，拒绝一切高空项目", "喜欢攀爬，但起跳前会仔细预估距离"], s: [2, 4, 1, 3] },
+        { q: "听到手机里播放陌生猫叫声：", a: ["紧张或害怕，迅速跑到安全的角落躲起来", "凑到手机屏幕前闻，找猫在哪", "抬头看一眼，发现是假的，继续倒头睡", "警觉地听，眼神跟随声音方向"], s: [1, 4, 2, 3] },
+        { q: "当你主动伸手强行抱它或摸它时：", a: ["呼噜声巨大，主动翻出肚子让你摸", "立刻出爪反击，或者上嘴咬人", "勉强接受，任由你抱一会摸几下头", "忍受三秒钟，迅速挣扎走开"], s: [4, 1, 3, 2] },
+        { q: "当你情绪低落、大声哭泣或叹气时：", a: ["坐在你旁边，安静地看着你", "毫无波动，继续干它自己的事情", "嫌你太吵，直接离开房间", "凑过来蹭你，甚至对你踩奶安抚"], s: [3, 2, 1, 4] },
+        { q: "它平时出现“踩奶”行为的频率：", a: ["几乎没有，觉得这种行为太幼稚", "只有在极度放松的软垫上才会踩几下", "绝对不踩，连肚子都不让碰", "频率极高，经常对着空气或被子疯狂踩"], s: [2, 3, 1, 4] },
+        { q: "它犯错被你大声训斥或轻轻惩罚后：", a: ["露出委屈的表情，主动靠近试图求和", "寻找机会，立刻从死角偷袭报复你", "记仇，背过身去长时间不理你", "躲起来一会，风头过了再出来"], s: [4, 1, 2, 3] },
+        { q: "每天早晨，它叫你起床的时间规律吗？", a: ["极其随缘，有时候甚至睡得比你还晚", "每天分秒不差，雷打不动地准时踩醒你", "看它什么时候饿，再决定叫不叫你", "误差在半小时内，基本上按生物钟叫人"], s: [1, 4, 2, 3] },
+        { q: "每天到了固定放饭的时间点，它的表现是：", a: ["准点蹲在空碗旁边等待，用眼神施压", "什么时候给就什么时候吃，毫无时间观念", "饭放着不管，有空才溜达过去吃两口", "晚一分钟就开始疯狂大叫，极度催促"], s: [3, 1, 2, 4] },
+        { q: "它平时白天的睡眠地点固定吗？", a: ["每隔几天就要寻找一个新地方睡觉", "在家里两三个固定的点位轮换睡觉", "随地大小睡，走到哪睡到哪", "只有一个雷打不动的固定位"], s: [2, 3, 1, 4] },
+        { q: "它突然在家里“跑酷”发疯的规律是：", a: ["纯看心情，随时可能在半夜三点直接起飞", "每天几乎在同一个时间段准时发疯", "毫无规律，偶尔想起来才疯一次", "频率固定，比如拉完屎后必定跑酷"], s: [1, 4, 2, 3] }
+    ];
+
+    const typeAtlas = {
+        "INTJ": { code: "DARK", name: "阴暗爬行者", slogan: "别找我，我是一团没有实体的阴影。", explain: "它的领地防御性极高。它抗拒光线与开放空间。它习惯在床底建立绝对安全区。它会对擅闯者实行精准打击。" },
+        "INTP": { code: "ZERO", name: "薛定谔猫", slogan: "我在不在，取决于你找不找我。", explain: "它的行踪具有高度随机性。它拒绝主动呼唤。它好奇心强但不愿受制于人. 它偏好在无人关注时突然现身。" },
+        "ENTJ": { code: "BOSS", name: "霸道总喵", slogan: "摸哪里，摸多久，规矩由我定。", explain: "它的控制欲极强。它喜欢强行介入并接管人类活动。它随时通过精准的作息要求宣示主权。它会用身体压制来确立地位。" },
+        "ENTP": { code: "THUG", name: "叛逆狂徒", slogan: "桌上的杯子，没有一个是无辜的。", explain: "它充满破坏欲。它喜欢挑战人类制定的物理规则。它精力极其旺盛。它热衷于反复将边缘物体推落。" },
+        "INFJ": { code: "TEA!", name: "心机绿茶", slogan: "家里的狗平时也是这么欺负你的吗？", explain: "它擅长情境伪装。它在铲屎官面前展现极高顺从度。它提供极高的情绪价值。它背地里却对其他宠物实施打击。" },
+        "INFP": { code: "LOVE", name: "纯爱战神", slogan: "除了你，其他人都是两脚兽。", explain: "它的情感极度专一。它只对单一目标产生深厚依恋。它对所有陌生访客表现出排他性。它对陌生环境保持强烈戒备心。" },
+        "ENFJ": { code: "KING", name: "社交悍匪", slogan: "整个小区，都在我的统治之下。", explain: "它的社交能量爆棚。它毫无领地恐惧感。它擅长运用自身魅力建立互动。它能与各种陌生人类确立主导地位。" },
+        "ENFP": { code: "HIGH", name: "午夜场DJ", slogan: "睡什么睡，起来嗨！", explain: "它的作息极度反人类。它在夜间活跃度达到峰值。它极度粘人且精力旺盛。它伴有间歇性满屋跑酷行为。" },
+        "ISTJ": { code: "NEAT", name: "洁癖狂", slogan: "这盆里的屎不是我的，我不上。", explain: "它对环境卫生与秩序要求极高。它掩埋排泄物耗时极长。它做事按部就班。它无法容忍共享厕所的异味。" },
+        "ISFJ": { code: "HOME", name: "窝里横", slogan: "在家我是王，出门我是虫。", explain: "它展现极致双面性格。它在熟悉的纸箱里极度自信。它在家里会主动求贴贴。它面对陌生环境瞬间丧失行动力。" },
+        "ESTJ": { code: "BLAH", name: "嘴碎子", slogan: "喵喵喵喵喵喵喵喵！", explain: "它的表达欲异常旺盛。它习惯用声音指挥人类动作。它用声音痛骂人类。它对晚放饭等行为会进行疯狂指责。" },
+        "ESFJ": { code: "OPEN", name: "中央空调", slogan: "只要有肉泥，谁都是我好爹妈。", explain: "它是零忠诚度的公关好手。它极易被食物收买。它对所有手持零食的人类展现亲昵。它毫无底线地讨好人类。" },
+        "ISTP": { code: "KILL", name: "冷面杀手", slogan: "莫挨老子。", explain: "它的情感反馈极低。它拒绝一切不必要的身体接触。它的物理战力爆表。它仅对快速移动的物体保留狩猎本能。" },
+        "ISFP": { code: "ZEN~", name: "老干部", slogan: "一切有为法，如梦幻泡影。", explain: "它的世俗欲望极低。它长期保持静止状态。它的性格温吞。它对高级逗猫棒缺乏热情。它对贵价罐头漠不关心。" },
+        "ESTP": { code: "YOLO", name: "显眼包", slogan: "看我看我，我能上天！", explain: "它是极度渴望关注的行动派。它热衷于物理跑酷。它只管当下爽。它严重缺乏基础的危险感知能力。" },
+        "ESFP": { code: "DUMB", name: "笨蛋美人", slogan: "我长得好看，智商换的。", explain: "它的外貌出众。它的认知协调性差。它非常亲人且随性. 它看似优雅高贵. 它实则经常踩翻水碗或平地摔。" }
+    };
+
+    let curr = 0;
+    let scores = [0, 0, 0, 0];
+    let history = [];
+
+    function startQuiz() {
+        document.getElementById('screen-welcome').classList.remove('active');
+        document.getElementById('screen-quiz').classList.add('active');
+        render();
+    }
+
+    function render() {
+        const q = questions[curr];
+        document.getElementById('q-text').innerText = q.q;
+        document.getElementById('q-idx').innerText = `${curr + 1} / 16`;
+        document.getElementById('progress-bar').style.width = `${((curr + 1) / 16) * 100}%`;
+        document.getElementById('btn-prev').style.display = curr > 0 ? 'block' : 'none';
+        const box = document.getElementById('options-box');
+        box.innerHTML = '';
+        q.a.forEach((opt, i) => {
+            const d = document.createElement('div');
+            d.className = 'option-item';
+            d.innerText = opt;
+            d.onclick = () => next(i);
+            box.appendChild(d);
+        });
+    }
+
+    function next(idx) {
+        const s = questions[curr].s[idx];
+        history[curr] = s;
+        scores[Math.floor(curr / 4)] += s;
+        curr++;
+        if (curr < 16) render(); else finish();
+    }
+
+    function prevQuestion() {
+        if (curr <= 0) return;
+        curr--;
+        scores[Math.floor(curr / 4)] -= history[curr];
+        render();
+    }
+
+    function finish() {
+        document.getElementById('screen-quiz').style.display = 'none';
+        document.getElementById('loader').style.display = 'flex';
+        let m = [scores[0]>=11?'E':'I', scores[1]>=11?'N':'S', scores[2]>=11?'F':'T', scores[3]>=11?'J':'P'].join('');
+        const res = typeAtlas[m];
+        setTimeout(() => {
+            document.getElementById('loader').style.display = 'none';
+            document.getElementById('screen-result').classList.add('active');
+            document.getElementById('res-code').innerText = res.code;
+            document.getElementById('res-name').innerText = res.name;
+            document.getElementById('res-slogan').innerText = `"${res.slogan}"`;
+            document.getElementById('res-explain').innerText = res.explain;
+            document.getElementById('res-img').src = `cats/${res.code}.png`;
+            document.getElementById('res-img').onerror = function() {
+                this.src = "https://via.placeholder.com/500/F8F9FA/FFC300?text=🐈";
+            };
+        }, 1500);
+    }
+</script>
+<style>@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }</style>
+</body>
+</html>
