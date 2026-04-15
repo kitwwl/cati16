@@ -4,6 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>CATI 猫格测试 - 正式版</title>
+    
+    <!-- 社交分享元标签 (Open Graph) -->
+    <meta property="og:title" content="CATI 猫格测试 - 探索 16 型猫格">
+    <meta property="og:description" content="根据猫咪最真实的日常反应，探索它属于 16 型猫格中的哪一种？">
+    <meta property="og:image" content="cats/share.png">
+    <meta property="og:type" content="website">
+
     <style>
         :root {
             --primary-color: #FFC300; 
@@ -99,6 +106,11 @@
 </head>
 <body>
 
+    <!-- 微信分享缩略图 (隐藏但确保在正文开头) -->
+    <div style="position: absolute; top: -9999px; left: -9999px; width: 0; height: 0; overflow: hidden;">
+        <img src="cats/share.png" alt="分享缩略图">
+    </div>
+
 <div id="app">
     <!-- 首页 -->
     <div id="screen-welcome" class="screen active">
@@ -182,7 +194,7 @@
         "ISFJ": { code: "HOME", name: "窝里横", slogan: "在家我是王，出门我是虫。", explain: "它展现极致双面性格。它在熟悉的纸箱里极度自信。它在家里会主动求贴贴。它面对陌生环境瞬间丧失行动力。" },
         "ESTJ": { code: "BLAH", name: "嘴碎子", slogan: "喵喵喵喵喵喵喵喵！", explain: "它的表达欲异常旺盛。它习惯用声音指挥人类动作。它用声音痛骂人类。它对晚放饭等行为会进行疯狂指责。" },
         "ESFJ": { code: "OPEN", name: "中央空调", slogan: "只要有肉泥，谁都是我好爹妈。", explain: "它是零忠诚度的公关好手。它极易被食物收买。它对所有手持零食的人类展现亲昵。它毫无底线地讨好人类。" },
-        "ISTP": { code: "KILL", name: "冷面杀手", slogan: "莫挨老子。", explain: "它的情感反馈极低。它拒绝一切不必要的身体接触。它的物理战力爆表。它仅对快速移动的物体保留狩猎本能。" },
+        "ISTP": { code: "KILL", name: "冷面杀手", slogan: "莫挨老子。", explain: "它的情感反馈极低。它拒绝一切不必要的身体接触. 它的物理战力爆表. 它仅对快速移动的物体保留狩猎本能。" },
         "ISFP": { code: "ZEN~", name: "老干部", slogan: "一切有为法，如梦幻泡影。", explain: "它的世俗欲望极低。它长期保持静止状态。它的性格温吞。它对高级逗猫棒缺乏热情。它对贵价罐头漠不关心。" },
         "ESTP": { code: "YOLO", name: "显眼包", slogan: "看我看我，我能上天！", explain: "它是极度渴望关注的行动派。它热衷于物理跑酷。它只管当下爽。它严重缺乏基础的危险感知能力。" },
         "ESFP": { code: "DUMB", name: "笨蛋美人", slogan: "我长得好看，智商换的。", explain: "它的外貌出众。它的认知协调性差。它非常亲人且随性. 它看似优雅高贵. 它实则经常踩翻水碗或平地摔。" }
